@@ -1,0 +1,10 @@
+---
+# Variables for role keepalived
+keepalived_auth_pass: ""
+keepalived_role: "MASTER"
+keepalived_router_id: "1"
+keepalived_shared_iface: ""
+keepalived_shared_ip: ""
+keepalived_check_process: "keepalived"
+keepalived_priority: "200"
+keepalived_backup_priority: "100"

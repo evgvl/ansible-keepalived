@@ -1,0 +1,7 @@
+---
+# This playbook deploys the whole application stack in this site.  
+- name: apply keepalived configuration to all nodes
+  hosts: all
+  become: yes
+  roles:
+    - keepalived

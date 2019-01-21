@@ -1,0 +1,62 @@
+! Configuration File for keepalived
+global_defs {
+}
+
+vrrp_sync_group cluster {
+        group {
+                {{group_names[-1]}}
+        }
+}
+
+vrrp_script chk_service {           # Requires keepalived-1.1.13
+        script '/etc/keepalived/check_script.sh'     # cheaper than pidof
+        interval 2                      # check every 2 seconds
+}
+
+vrrp_instance {{group_names[-1]}} {
+{% if hostvars[groups[group_names[-1]][0]]['ansible_default_ipv4']['address'] == inventory_hostname %}
+    state PRIMARY
+    priority 200
+{% else %}
+    state BACKUP
+    priority 100
+{% endif %}
+
+	interface {{ansible_default_ipv4.interface}}
+	virtual_router_id {{ keepalived_router_id }}
+
+	track_interface {
+        	{{ansible_default_ipv4.interface}}
+	}
+
+	authentication {
+		auth_type PASS
+       	auth_pass {{ keepalived_auth_pass }}
+	}
+
+{% for host in groups[group_names[-1]] %}
+{% if host == inventory_hostname %}
+    unicast_src_ip {{host}}
+{% endif %}
+{% endfor %}
+    unicast_peer {
+{% for host in groups[group_names[-1]] %}
+{% if host != inventory_hostname %}
+         {{host}}
+{% endif %}
+{% endfor %}
+    }
+
+	virtual_ipaddress {
+        	{{vip}}/{{ (ansible_default_ipv4.address + '/' + ansible_default_ipv4.netmask) | ipaddr('prefix') }} dev {{ansible_default_ipv4.interface}}
+	}
+
+	#virtual_routes {}
+
+	track_script {
+		chk_service
+	}
+
+	notify /etc/keepalived/cluster_status.sh
+	advert_int 1
+}

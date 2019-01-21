@@ -1,0 +1,47 @@
+---
+- name: Install keepalived (Centos/RHEL)
+  yum:
+      name: keepalived
+      state: latest
+      conf_file: '/etc/yum.conf'
+  when: ansible_os_family == "RedHat"
+  notify: restart keepalived
+
+- name: cluster_status.sh script
+  copy:
+      src: cluster_status.sh
+      dest: /etc/keepalived/cluster_status.sh
+      mode: 0755
+      owner: root
+      group: root
+  tags: keepalived
+
+- name: chk_service script shell
+  template: 
+      src: check_script.sh.j2 
+      dest: /etc/keepalived/check_script.sh
+      mode: 0755
+      owner: root
+      group: root
+  notify: restart keepalived
+
+- name: cluster_status.sh script
+  copy:
+      src: cluster_status.sh
+      dest: /etc/keepalived/cluster_status.sh
+      mode: 0755
+      owner: root
+      group: root
+
+- name: Configuration keepalived
+  template:
+      src: keepalived.conf.j2
+      dest: /etc/keepalived/keepalived.conf
+  tags: config
+  notify: restart keepalived
+
+- name: Start keepalived
+  service:
+      name: keepalived
+      state: started
+      enabled: yes
