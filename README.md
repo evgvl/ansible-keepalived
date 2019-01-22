@@ -1,39 +1,48 @@
-Role Name
+Ansible Keepalived Role
 =========
 
-A brief description of the role goes here.
+This Role can install and configure Keepalived service in any environment for unlimited hosts.
+You need define only hosts for install in groups.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Minimum version of the ansible for installation: 2.5
+- Supported OS
+    - RHEL, CentOS, Oracle Linux
+        - 6
+        - 7
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+List of variables defined in defaults/main.yml, which need change:
 
-Dependencies
-------------
+- `keepalived_auth_pass` - You need define password here
+- `keepalived_router_id` - "1"
+- `keepalived_check_process` - Process for check
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Also you need define variable `vip` in your group_vars which contents shared ip address of keepalived claster.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
     - hosts: servers
+      vars:
+        keepalived_auth_pass: "passwordhere"
+        keepalived_router_id: "11"
+        keepalived_check_process: "processnameforcheck"
+        become: yes
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: ansible-keepalived }
 
 License
 -------
 
-BSD
+Apache
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
-=======
+This role was created by [Evgeny Vlasov](https://www.facebook.com/vl.evg)
