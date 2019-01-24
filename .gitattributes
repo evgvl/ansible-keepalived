@@ -1,4 +1,5 @@
 files/* linguist-vendored
+*.yml	linguist-language=Python
 *.yml	text diff=python
 *.yml	text eol=lf
 *.py	text eol=lf
