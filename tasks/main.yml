@@ -1,4 +1,5 @@
 ---
+# This role installs and sets up keepalived
 - name: Install keepalived (Centos/RHEL)
   yum:
       name: keepalived
@@ -9,34 +10,44 @@
 
 - name: cluster_status.sh script
   copy:
-      src: cluster_status.sh
-      dest: /etc/keepalived/cluster_status.sh
-      mode: 0755
-      owner: root
-      group: root
+        src: cluster_status.sh
+        dest: /etc/keepalived/cluster_status.sh
+        mode: 0755
+        owner: root
+        group: root
   tags: keepalived
 
 - name: chk_service script shell
   template: 
-      src: check_script.sh.j2 
-      dest: /etc/keepalived/check_script.sh
-      mode: 0755
-      owner: root
-      group: root
+    src: check_script.sh.j2 
+    dest: /etc/keepalived/check_script.sh
+    mode: 0755
+    owner: root
+    group: root
   notify: restart keepalived
 
 - name: cluster_status.sh script
   copy:
-      src: cluster_status.sh
-      dest: /etc/keepalived/cluster_status.sh
-      mode: 0755
-      owner: root
-      group: root
+        src: cluster_status.sh
+        dest: /etc/keepalived/cluster_status.sh
+        mode: 0755
+        owner: root
+        group: root
+
+- name: cluster_status2.sh script
+  copy:
+        src: cluster_status2.sh
+        dest: /etc/keepalived/cluster_status2.sh
+        mode: 0755
+        owner: root
+        group: root
+  when: vip2 is defined
 
 - name: Configuration keepalived
   template:
       src: keepalived.conf.j2
       dest: /etc/keepalived/keepalived.conf
+      backup: yes
   tags: config
   notify: restart keepalived
 

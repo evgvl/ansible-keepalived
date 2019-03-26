@@ -1,10 +1,18 @@
 ---
+
 # Variables for role keepalived
+
 keepalived_auth_pass: ""
 keepalived_role: "MASTER"
-keepalived_router_id: "1"
-keepalived_shared_iface: ""
+keepalived_router_id: 11
+keepalived_shared_iface: "ens192"
 keepalived_shared_ip: ""
 keepalived_check_process: "keepalived"
 keepalived_priority: "200"
 keepalived_backup_priority: "100"
+keepalived_pr_hosts:
+    - "sn1"
+    - "1"
+
+# define name of group from group list from inventory
+ans_group_name: "{{group_names[0]}}"

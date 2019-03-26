@@ -1,20 +1,28 @@
 ! Configuration File for keepalived
 global_defs {
+       router_id {{ansible_hostname}}
 }
 
 vrrp_sync_group cluster {
         group {
-                {{group_names[-1]}}
+                {{ans_group_name}}
         }
 }
+{% if vip2 is defined %}
+vrrp_sync_group cluster2 {
+        group {
+                {{ans_group_name}}-vip2
+        }
+}
+{% endif %}
 
 vrrp_script chk_service {           # Requires keepalived-1.1.13
         script '/etc/keepalived/check_script.sh'     # cheaper than pidof
         interval 2                      # check every 2 seconds
 }
 
-vrrp_instance {{group_names[-1]}} {
-{% if hostvars[groups[group_names[-1]][0]]['ansible_default_ipv4']['address'] == inventory_hostname %}
+vrrp_instance {{ans_group_name}} {
+{% if hostvars[groups[ans_group_name][0]]['ansible_default_ipv4']['address'] == inventory_hostname %}
     state PRIMARY
     priority 200
 {% else %}
@@ -34,13 +42,13 @@ vrrp_instance {{group_names[-1]}} {
        	auth_pass {{ keepalived_auth_pass }}
 	}
 
-{% for host in groups[group_names[-1]] %}
+{% for host in groups[ans_group_name] %}
 {% if host == inventory_hostname %}
     unicast_src_ip {{host}}
 {% endif %}
 {% endfor %}
     unicast_peer {
-{% for host in groups[group_names[-1]] %}
+{% for host in groups[ans_group_name] %}
 {% if host != inventory_hostname %}
          {{host}}
 {% endif %}
@@ -60,3 +68,54 @@ vrrp_instance {{group_names[-1]}} {
 	notify /etc/keepalived/cluster_status.sh
 	advert_int 1
 }
+
+{% if vip2 is defined %}
+
+vrrp_instance {{ans_group_name}}-vip2 {
+{% if hostvars[groups[ans_group_name][0]]['ansible_default_ipv4']['address'] == inventory_hostname %}
+    state BACKUP
+    priority 100
+{% else %}
+    state PRIMARY
+    priority 200
+{% endif %}
+
+	interface {{ansible_default_ipv4.interface}}
+	virtual_router_id {{ keepalived_router_id + 10 }}
+
+	track_interface {
+        	{{ansible_default_ipv4.interface}}
+	}
+
+	authentication {
+		auth_type PASS
+       	auth_pass {{ keepalived_auth_pass }}
+	}
+
+{% for host in groups[ans_group_name] %}
+{% if host == inventory_hostname %}
+    unicast_src_ip {{host}}
+{% endif %}
+{% endfor %}
+    unicast_peer {
+{% for host in groups[ans_group_name] %}
+{% if host != inventory_hostname %}
+         {{host}}
+{% endif %}
+{% endfor %}
+    }
+
+	virtual_ipaddress {
+        	{{vip2}}/{{ (ansible_default_ipv4.address + '/' + ansible_default_ipv4.netmask) | ipaddr('prefix') }} dev {{ansible_default_ipv4.interface}}
+	}
+
+	#virtual_routes {}
+
+	track_script {
+		chk_service
+	}
+
+	notify /etc/keepalived/cluster_status2.sh
+	advert_int 1
+}
+{% endif %}
