@@ -45,4 +45,4 @@ Apache
 Author Information
 ------------------
 
-This role was created by [Evgeny Vlasov](www.linkedin.com/in/evgvl)
+This role was created by [Evgeny Vlasov](https://www.linkedin.com/in/evgvl)
